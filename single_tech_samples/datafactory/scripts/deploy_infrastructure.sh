@@ -42,6 +42,11 @@ set -o nounset
 #####################
 # DEPLOY ARM TEMPLATE
 
+export ENV_NAME='dev'
+export RESOURCE_GROUP_NAME='ODIN-file-upload'
+export RESOURCE_GROUP_LOCATION='Central US'
+export AZURE_SUBSCRIPTION_ID='60c4e16f-1b86-45cf-a961-035631ee2924'
+
 # Set account to where ARM template will be deployed to
 echo "Deploying to Subscription: $AZURE_SUBSCRIPTION_ID"
 az account set --subscription $AZURE_SUBSCRIPTION_ID
@@ -52,15 +57,16 @@ az group create --name "$RESOURCE_GROUP_NAME" --location "$RESOURCE_GROUP_LOCATI
 
 # By default, set all KeyVault permission to deployer
 # Retrieve KeyVault User Id
-kv_owner_object_id=$(az ad signed-in-user show --output json | jq -r '.objectId')
+kv_owner_object_id='266ab173-5c44-4f30-8830-b77d4a09690d'
+#kv_owner_object_id=$(az ad signed-in-user show --output json | jq -r '.objectId')
 
 # Deploy arm template
 echo "Deploying resources into $RESOURCE_GROUP_NAME"
 arm_output=$(az deployment group create \
     --resource-group "$RESOURCE_GROUP_NAME" \
-    --template-file "./infrastructure/azuredeploy.json" \
-    --parameters @"./infrastructure/azuredeploy.parameters.${ENV_NAME}.json" \
-    --parameters keyvault_owner_object_id=${kv_owner_object_id} deployment_id=${DEPLOYMENT_ID} \
+    --template-file "../infrastructure/azuredeploy.json" \
+    --parameters @"../infrastructure/azuredeploy.parameters.${ENV_NAME}.json" \
+    --parameters keyvault_owner_object_id=${kv_owner_object_id}  \
     --output json)
 
 if [[ -z $arm_output ]]; then
