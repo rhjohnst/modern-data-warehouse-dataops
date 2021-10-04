@@ -38,7 +38,6 @@ set -o nounset
 # DATAFACTORY_NAME
 # ADF_DIR
 
-
 # Consts
 apiVersion="2018-06-01"
 baseUrl="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}"

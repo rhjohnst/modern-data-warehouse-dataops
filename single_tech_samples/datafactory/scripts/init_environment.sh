@@ -2,6 +2,22 @@
 
 # check required variables are specified.
 
+#my GIT variables
+export GITHUB_REPO='rhjohnst/modern-data-warehouse-devops'
+export GITHUB_PAT_TOKEN='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'
+export ENV_NAME='dev'
+
+#using MCS Internals subscription
+#export RESOURCE_GROUP_NAME='ODIN-file-upload'
+#export RESOURCE_GROUP_LOCATION='Central US'
+#export AZURE_SUBSCRIPTION_ID='60c4e16f-1b86-45cf-a961-035631ee2924'
+
+#using ArmyCoder MSDN Subscription
+export AZURE_SUBSCRIPTION_ID='8e58e140-17ab-4f9a-af30-1da4ae5743e1'
+export RESOURCE_GROUP_LOCATION='centralus'
+
+
+
 if [ -z $GITHUB_REPO ]
 then
     echo "Please specify a github repo using the GITHUB_REPO environment variable in this form '<my_github_handle>/<repo>'. (i.e. 'devlace/mdw-dataops-import')"

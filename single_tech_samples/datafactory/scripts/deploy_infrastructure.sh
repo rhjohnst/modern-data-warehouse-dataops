@@ -38,14 +38,26 @@ set -o nounset
 # RESOURCE_GROUP_LOCATION
 # AZURE_SUBSCRIPTION_ID
 
+#setting environment variable for running in bash when we try to create/assign service principle
+#ref: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_with_git_bash.md#auto-translation-of-resource-ids
+$ MSYS_NO_PATHCONV=1
 
+# hard coded environemnt variables and other items to get this to publish in limited access resource group
 #####################
 # DEPLOY ARM TEMPLATE
 
+
 export ENV_NAME='dev'
-export RESOURCE_GROUP_NAME='ODIN-file-upload'
+#using MCS Internals subscription
+#export RESOURCE_GROUP_NAME='ODIN-file-upload'
+#export RESOURCE_GROUP_LOCATION='Central US'
+#export AZURE_SUBSCRIPTION_ID='60c4e16f-1b86-45cf-a961-035631ee2924'
+#kv_owner_object_id='266ab173-5c44-4f30-8830-b77d4a09690d'
+
+#using ArmyCoder FTE MSDN Subscription
+export AZURE_SUBSCRIPTION_ID='8e58e140-17ab-4f9a-af30-1da4ae5743e1'
 export RESOURCE_GROUP_LOCATION='Central US'
-export AZURE_SUBSCRIPTION_ID='60c4e16f-1b86-45cf-a961-035631ee2924'
+#kv_owner_object_id='26285fb8-a740-4749-8b85-ed0975dc99a7'
 
 # Set account to where ARM template will be deployed to
 echo "Deploying to Subscription: $AZURE_SUBSCRIPTION_ID"
@@ -57,15 +69,15 @@ az group create --name "$RESOURCE_GROUP_NAME" --location "$RESOURCE_GROUP_LOCATI
 
 # By default, set all KeyVault permission to deployer
 # Retrieve KeyVault User Id
-kv_owner_object_id='266ab173-5c44-4f30-8830-b77d4a09690d'
+kv_owner_object_id='26285fb8-a740-4749-8b85-ed0975dc99a7'
 #kv_owner_object_id=$(az ad signed-in-user show --output json | jq -r '.objectId')
 
 # Deploy arm template
 echo "Deploying resources into $RESOURCE_GROUP_NAME"
 arm_output=$(az deployment group create \
     --resource-group "$RESOURCE_GROUP_NAME" \
-    --template-file "../infrastructure/azuredeploy.json" \
-    --parameters @"../infrastructure/azuredeploy.parameters.${ENV_NAME}.json" \
+    --template-file "./infrastructure/azuredeploy.json" \
+    --parameters @"./infrastructure/azuredeploy.parameters.${ENV_NAME}.json" \
     --parameters keyvault_owner_object_id=${kv_owner_object_id}  \
     --output json)
 

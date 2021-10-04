@@ -24,6 +24,7 @@ set -o nounset
 . ./scripts/verify_prerequisites.sh
 . ./scripts/init_environment.sh
 
+
 ###################
 # DEPLOY ALL RESOURCES FOR EACH ENVIRONMENT
 

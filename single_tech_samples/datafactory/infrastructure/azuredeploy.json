@@ -28,6 +28,7 @@
         },
         "keyvault_owner_object_id": {
             "type": "String",
+            "defaultValue": "266ab173-5c44-4f30-8830-b77d4a09690d",
             "metadata": {
                 "description": "Active Directory ObjectId to be granted full rights to KV"
             }
