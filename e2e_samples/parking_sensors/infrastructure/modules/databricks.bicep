@@ -29,7 +29,8 @@ resource databricks 'Microsoft.Databricks/workspaces@2018-04-01' = {
   }
 }
 
-resource databricks_roleassignment 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
+//rsj- changed from 2020-10-01-preview to 2021-04-01-preview to overcome an error in Azure Gov
+resource databricks_roleassignment 'Microsoft.Authorization/roleAssignments@2021-04-01-preview' = {
   name: guid(databricks.id)
   scope: databricks
   properties: {

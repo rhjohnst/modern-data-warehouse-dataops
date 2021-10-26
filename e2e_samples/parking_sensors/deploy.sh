@@ -33,7 +33,9 @@ github_repo_url="https://github.com/$GITHUB_REPO"
 ###################
 # DEPLOY ALL FOR EACH ENVIRONMENT
 
-for env_name in dev stg prod; do  # dev stg prod
+#for env_name in dev stg prod; do  # dev stg prod
+#rsj attempting to only deploy for dev
+for env_name in dev; do # dev
     PROJECT=$project \
     DEPLOYMENT_ID=$DEPLOYMENT_ID \
     ENV_NAME=$env_name \
@@ -42,7 +44,6 @@ for env_name in dev stg prod; do  # dev stg prod
     AZURESQL_SERVER_PASSWORD=$AZURESQL_SERVER_PASSWORD \
     bash -c "./scripts/deploy_infrastructure.sh"  # inclues AzDevOps Azure Service Connections and Variable Groups
 done
-
 
 ###################
 # Deploy AzDevOps Pipelines

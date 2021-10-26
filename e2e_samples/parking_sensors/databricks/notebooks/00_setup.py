@@ -21,10 +21,11 @@ dbutils.fs.refreshMounts()
 # COMMAND ----------
 
 # Retrieve storage credentials
-storage_account = dbutils.secrets.get(scope = "storage_scope", key = "datalakeAccountName")
-storage_sp_id = dbutils.secrets.get(scope = "storage_scope", key = "spStorId")
-storage_sp_key = dbutils.secrets.get(scope = "storage_scope", key = "spStorPass")
-storage_sp_tenant = dbutils.secrets.get(scope = "storage_scope", key = "spStorTenantId")
+#rsj - changed scope from "storage_scope" to "az-adl-scope-test"
+storage_account = dbutils.secrets.get(scope = "az-adl-scope-test", key = "datalakeAccountName")
+storage_sp_id = dbutils.secrets.get(scope = "az-adl-scope-test", key = "spStorId")
+storage_sp_key = dbutils.secrets.get(scope = "az-adl-scope-test", key = "spStorPass")
+storage_sp_tenant = dbutils.secrets.get(scope = "az-adl-scope-test", key = "spStorTenantId")
 
 # Mount
 configs = {"fs.azure.account.auth.type": "OAuth",

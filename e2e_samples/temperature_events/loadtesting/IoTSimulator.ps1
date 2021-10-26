@@ -3,8 +3,9 @@ This script creates several Azure Container Instances that runs the IoT Simulato
 All resources, including the resource group, will be torn down automatically
 after the simulators finish sending the load.
 #>
+<# commented out so we can hardcode for now
 param (
-    [string]$Location = 'japaneast',
+    [string]$Location = 'usgovvirginia',
     [Parameter(Mandatory=$true)][string]$ResourceGroup,
     [int]$DeviceCount = 1,
     [int]$ContainerCount = 1,
@@ -18,14 +19,32 @@ param (
     [double]$Cpu = 1.0,
     [double]$Memory = 1.5
  )
+ #>
 
-<#
+<# 
 We want the load to generate:
 - 50% of the load where deviceId >= 1,000. The system is not interested in this data so these should be filter it out.
 - 40% "good" data where deviceId <1,000 AND temperature <100
 - 10% "bad" data where deviceId <1,000 AND temperature >100
-#>
-$FilteredTemplate = '{ \"deviceId\": \"$.FilteredDeviceId\", \"temperature\": $.Temperature, \"time\": \"$.Time\" }'
+ #>
+
+ $Location = 'usgovvirginia'
+ $ResourceGroup = 'rg-tempevent3app-dev'
+ $DeviceCount = 1
+ $ContainerCount = 1
+ $MessageCount = 1000
+ $Interval = 1000
+ $FixPayload = ''
+ $FixPayloadSize = 0
+ $Header = ''
+ $EventHubConnectionString = "Endpoint=sb://evh-ingest-tempevnt3app-dev.servicebus.usgovcloudapi.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=rKOcJUnvVolGaNQDc7kZ5EybKT8aa7YDbvboDUKrMNQ="
+ $Image = "iottelemetrysimulator/azureiot-telemetrysimulator:latest
+ $Cpu = 1.0
+ $Memory = 1.5
+
+
+
+ $FilteredTemplate = '{ \"deviceId\": \"$.FilteredDeviceId\", \"temperature\": $.Temperature, \"time\": \"$.Time\" }'
 $GoodTemplate = '{ \"deviceId\": \"$.DeviceId\", \"temperature\": $.Temperature, \"time\": \"$.Time\" }'
 $BadTemplate = '{ \"deviceId\": \"$.DeviceId\", \"temperature\": $.BadTemperature, \"time\": \"$.Time\" }'
 $Variables = '[{name: \"DeviceId\", random: true, max: 999, min: 0}, {name: \"FilteredDeviceId\", random: true, min: 1000}, {name: \"Temperature\", random: true, max: 99, min: 0}, {name: \"BadTemperature\", random: true, min: 100}]'

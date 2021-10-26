@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#rsj  variables
+export ENV_NAME='dev'
+export AZURE_SUBSCRIPTION_ID=''
+export RESOURCE_GROUP_LOCATION='usgovarizona'
+export AZURE_LOCATION='usgovarizona'
+export DEPLOYMENT_ID='dodl2'
+export GITHUB_REPO=''
+export GITHUB_PAT_TOKEN='g'
+
 # check required variables are specified.
 
 if [ -z "$GITHUB_REPO" ]

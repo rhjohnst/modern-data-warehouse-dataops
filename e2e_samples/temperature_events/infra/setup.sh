@@ -19,26 +19,23 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-# set -o xtrace # For debugging
+#set -o xtrace # For debugging
 
-if [ $# -ne 4 ]; then
-    cat << EOF
-Usage:
+#rsj - setting environment variable for running in bash when we try to create/assign service principle
+#ref: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_with_git_bash.md#auto-translation-of-resource-ids
+export MSYS_NO_PATHCONV='1'
+#rsj - deleted parameter count 'if' statement and setting up environment variables here
+project="tempevnt3"
+envname="dev"
+RESOURCE_GROUP_NAME="mdwdops-$project-$envname-rg"
+TF_STATE_STORAGE_ACCOUNT_NAME="mdwdopsst$envname$project"
+KEYVAULT_NAME="mdwdops-kv-$envname-$project"
+LOCATION="usgovvirginia"
 
-    $0 resourcegroup storageaccount keyvault region
-
-Example:
-
-    $0 resourcegroup storageaccount keyvault eastus2
-
-EOF
-    exit 1;
-fi
-
-RESOURCE_GROUP_NAME=$1
-TF_STATE_STORAGE_ACCOUNT_NAME=$2
-KEYVAULT_NAME=$3
-LOCATION=$4
+echo "resource-group=$RESOURCE_GROUP_NAME"
+echo "storage-account=$TF_STATE_STORAGE_ACCOUNT_NAME"
+echo "kv=$KEYVAULT_NAME"
+echo "region=$LOCATION"
 
 export TF_STATE_CONTAINER_NAME=terraform-state
 
@@ -71,7 +68,10 @@ az keyvault secret set --name tfstate-storage-key-dev --value "$ACCOUNT_KEY_DEV"
 # Create Service Principal
 echo "Creating Service Principal"
 SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+#error - taking out the scope
+#ad=$(az ad sp create-for-rbac --role Contributor --query '[appId, password]' --output tsv)
 ad=$(az ad sp create-for-rbac --role Contributor --scopes /subscriptions/"$SUBSCRIPTION_ID" --query '[appId, password]' --output tsv)
+
 APP_ID=$(echo "${ad}" | head -1)
 SP_PASSWD=$(echo "${ad}" | tail -1)
 TENANT_ID=$(az ad sp show --id "$APP_ID" --query appOwnerTenantId --output tsv)

@@ -6,6 +6,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+  environment = "usgovernment"
+    
 }
 
 module "service" {

@@ -61,19 +61,21 @@ cluster_exists () {
 
 echo "Configuring Databricks workspace."
 
+#rsj - errors here commenting out as I already created the scope manually
 # Create secret scope, if not exists
-scope_name="storage_scope"
-if [[ ! -z $(databricks secrets list-scopes | grep "$scope_name") ]]; then
+#scope_name="storage_scope"
+#if [[ ! -z $(databricks secrets list-scopes | grep "$scope_name") ]]; then
     # Delete existing scope
     # NOTE: Need to recreate everytime to ensure idempotent deployment. Reruning deployment overrides KeyVault permissions.
-    echo "Scope already exists, re-creating secrets scope: $scope_name"
-    databricks secrets delete-scope --scope "$scope_name"
-fi
+#    echo "Scope already exists, re-creating secrets scope: $scope_name"
+#    databricks secrets delete-scope --scope "$scope_name"
+#fi
 # Create secret scope
-databricks secrets create-scope --scope "$scope_name" \
-    --scope-backend-type AZURE_KEYVAULT \
-    --resource-id "$KEYVAULT_RESOURCE_ID" \
-    --dns-name "$KEYVAULT_DNS_NAME"
+
+#databricks secrets create-scope --scope "$scope_name" \
+#    --scope-backend-type AZURE_KEYVAULT \
+#    --resource-id "$KEYVAULT_RESOURCE_ID" \
+#    --dns-name "$KEYVAULT_DNS_NAME"
 
 # Upload notebooks
 echo "Uploading notebooks..."
@@ -88,6 +90,7 @@ wait_for_run $(databricks runs submit --json-file "./databricks/config/run.setup
 echo "Uploading libs..."
 databricks fs cp --recursive --overwrite "./databricks/libs/" "dbfs:/mnt/datalake/sys/databricks/libs/"
 
+#rsj - commenting out since this is timing out and failing/ending process
 # Create initial cluster, if not yet exists
 cluster_config="./databricks/config/cluster.config.json"
 echo "Creating an interactive cluster using config in $cluster_config..."

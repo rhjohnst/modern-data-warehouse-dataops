@@ -28,7 +28,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-set -o xtrace # For debugging
+#set -o xtrace # For debugging
 
 ###################
 # REQUIRED ENV VARIABLES:
@@ -39,6 +39,10 @@ set -o xtrace # For debugging
 # AZURE_LOCATION
 # AZURE_SUBSCRIPTION_ID
 # AZURESQL_SERVER_PASSWORD
+
+#rsj - setting environment variable for running in bash when we try to create/assign service principle
+#ref: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_with_git_bash.md#auto-translation-of-resource-ids
+export MSYS_NO_PATHCONV='1'
 
 
 #####################
@@ -62,9 +66,11 @@ echo "Validating deployment"
 arm_output=$(az deployment group validate \
     --resource-group "$resource_group_name" \
     --template-file "./infrastructure/main.bicep" \
-    --parameters @"./infrastructure/main.parameters.${ENV_NAME}.json" \
+    --parameters @"./infrastructure/main.parameters.${ENV_NAME}.json"  \
     --parameters project="${PROJECT}" keyvault_owner_object_id="${kv_owner_object_id}" deployment_id="${DEPLOYMENT_ID}" sql_server_password="${AZURESQL_SERVER_PASSWORD}" \
     --output json)
+
+echo 'kv owner ['$kv_owner_object_id ']'
 
 # Deploy arm template
 echo "Deploying resources into $resource_group_name"
@@ -80,12 +86,10 @@ if [[ -z $arm_output ]]; then
     exit 1
 fi
 
-
 ########################
 # RETRIEVE KEYVAULT INFORMATION
 
 echo "Retrieving KeyVault information from the deployment."
-
 kv_name=$(echo "$arm_output" | jq -r '.properties.outputs.keyvault_name.value')
 kv_dns_name=https://${kv_name}.vault.azure.net/
 
@@ -201,10 +205,14 @@ databricks_host=https://$(echo "$arm_output" | jq -r '.properties.outputs.databr
 databricks_workspace_resource_id=$(echo "$arm_output" | jq -r '.properties.outputs.databricks_id.value')
 databricks_aad_token=$(az account get-access-token --resource 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d --output json | jq -r .accessToken) # Databricks app global id
 
+######
+#rsj - commented out and hard coding the databricks PAT for dodl2 PAT
+## databricks_token=
 # Use AAD token to generate PAT token
 databricks_token=$(DATABRICKS_TOKEN=$databricks_aad_token \
     DATABRICKS_HOST=$databricks_host \
     bash -c "databricks tokens create --comment 'deployment'" | jq -r .token_value)
+
 
 # Save in KeyVault
 az keyvault secret set --vault-name "$kv_name" --name "databricksDomain" --value "$databricks_host"
@@ -213,13 +221,14 @@ az keyvault secret set --vault-name "$kv_name" --name "databricksWorkspaceResour
 
 # Configure databricks (KeyVault-backed Secret scope, mount to storage via SP, databricks tables, cluster)
 # NOTE: must use AAD token, not PAT token
-DATABRICKS_TOKEN=$databricks_aad_token \
-DATABRICKS_HOST=$databricks_host \
-KEYVAULT_DNS_NAME=$kv_dns_name \
+export DATABRICKS_TOKEN=$databricks_aad_token \
+export DATABRICKS_HOST=$databricks_host \
+export KEYVAULT_DNS_NAME=$kv_dns_name \
+
 KEYVAULT_RESOURCE_ID=$(echo "$arm_output" | jq -r '.properties.outputs.keyvault_resource_id.value') \
     bash -c "./scripts/configure_databricks.sh"
 
-
+#########
 
 ####################
 # DATA FACTORY
@@ -232,6 +241,7 @@ mkdir -p $adfTempDir && cp -a adf/ .tmp/
 tmpfile=.tmpfile
 adfLsDir=$adfTempDir/linkedService
 jq --arg kvurl "$kv_dns_name" '.properties.typeProperties.baseUrl = $kvurl' $adfLsDir/Ls_KeyVault_01.json > "$tmpfile" && mv "$tmpfile" $adfLsDir/Ls_KeyVault_01.json
+#rsj - comment out next line to see if we can build all but Databricks components
 jq --arg databricksWorkspaceUrl "$databricks_host" '.properties.typeProperties.domain = $databricksWorkspaceUrl' $adfLsDir/Ls_AzureDatabricks_01.json > "$tmpfile" && mv "$tmpfile" $adfLsDir/Ls_AzureDatabricks_01.json
 jq --arg datalakeUrl "https://$azure_storage_account.dfs.core.windows.net" '.properties.typeProperties.url = $datalakeUrl' $adfLsDir/Ls_AdlsGen2_01.json > "$tmpfile" && mv "$tmpfile" $adfLsDir/Ls_AdlsGen2_01.json
 
@@ -265,7 +275,6 @@ az keyvault secret set --vault-name "$kv_name" --name "spAdfTenantId" --value "$
 
 ####################
 # AZDO Azure Service Connection and Variables Groups
-
 # AzDO Azure Service Connections
 PROJECT=$PROJECT \
 ENV_NAME=$ENV_NAME \

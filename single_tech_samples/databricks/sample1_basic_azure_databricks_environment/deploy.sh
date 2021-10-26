@@ -2,6 +2,32 @@
 
 set -e
 
+#. ./scripts/init_environment.sh
+#rsj my ENV variables - need to setup global config file to protect variables
+export ENV_NAME='dev'
+export PROJECT='mdwddbr'
+export AZURE_SUBSCRIPTION_ID=''
+export AZURE_RESOURCE_GROUP_LOCATION='centralus'
+export DEPLOYMENT_PREFIX='adbsampl1'
+export AZURE_RESOURCE_GROUP_NAME="$PROJECT-$DEPLOYMENT_PREFIX-$ENV_NAME-rg"
+# initialise optional variables.
+
+AZURE_RESOURCE_GROUP_LOCATION=${AZURE_RESOURCE_GROUP_LOCATION:-}
+if [ -z "$AZURE_RESOURCE_GROUP_LOCATION" ]
+then    
+    export AZURE_RESOURCE_GROUP_LOCATION="westus"
+    echo "No resource group location [AZURE_RESOURCE_GROUP_LOCATION] specified, defaulting to $AZURE_RESOURCE_GROUP_LOCATION"
+fi
+
+AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID:-}
+if [ -z "$AZURE_SUBSCRIPTION_ID" ]
+then
+    export AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+    echo "No Azure subscription id [AZURE_SUBSCRIPTION_ID] specified. Using default subscription id."
+fi
+
+DELETE_RESOURCE_GROUP='no'
+
 DEPLOYMENT_PREFIX=${DEPLOYMENT_PREFIX:-}
 AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID:-}
 AZURE_RESOURCE_GROUP_NAME=${AZURE_RESOURCE_GROUP_NAME:-}

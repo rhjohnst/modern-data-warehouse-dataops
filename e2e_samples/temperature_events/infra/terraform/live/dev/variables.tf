@@ -12,7 +12,7 @@ variable "environment" {
 variable "location" {
   type        = string
   description = "Azure Location of the service"
-  default     = "eastus2"
+  default     = "usgovvirginia"
 }
 
 variable "eventhub_config" {

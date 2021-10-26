@@ -45,7 +45,8 @@ resource storage 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   }
 }
 
-resource storage_roleassignment 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
+//rsj- changed from 2020-10-01-preview to 2021-04-01-preview to overcome an error in Azure Gov
+resource storage_roleassignment 'Microsoft.Authorization/roleAssignments@2021-04-01-preview' = {
   name: guid(storage.id)
   scope: storage
   properties: {
